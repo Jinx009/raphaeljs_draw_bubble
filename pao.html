@@ -1,0 +1,211 @@
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="inital-scale=1.0" />
+<title>JS实现气泡从水中急速上升效果</title>
+<script type="text/javascript" src="js/pagesize.640.js" ></script>
+<script type="text/javascript" src="js/jquery.js" ></script>
+<script type="text/javascript" src="js/raphael.js" ></script>
+<style type="text/css">
+body
+{
+	width:640px;
+	height:1010px;
+}
+#content
+{
+	background:url("images/bg.jpg");
+	width:640px;
+	height:100%;
+}
+body
+{
+    margin:0px;
+    padding:0px;
+}
+#footer
+{
+	width:640px;
+	bottom:0;left:0; 
+	background:rgb(12,3,4);
+	height:10%;
+	text-align: center;
+}
+
+</style>
+
+<script type="text/javascript">
+
+var jsonData = 
+{"message":
+	[
+		{"content":"我很不爽ssssssssssssssssssss"},
+		{"content":"我很不爽sssssssssssssssssssssssssssssss1"},
+		{"content":"我很不爽ssssssssssssssssssss2"},
+		{"content":"我很不sssssssssssss爽3"},
+		{"content":"我很不sssssssssssssss爽4"},
+		{"content":"xxsssssssssssssssssssssssx5"},
+		{"content":"xxx6"},
+		{"content":"OOXXXXOO无所谓"},
+		{"content":"xxssssssssssssx"},
+		{"content":"xxx1ssssssssssssss"},
+		{"content":"xxx2"},
+		{"content":"xxsssssssssssssssssx3"},
+		{"content":"xxsssssssssssssx4"},
+		{"content":"xxsssssssssssssx5"},
+		{"content":"xxx6"},
+		{"content":"xxx"},
+		{"content":"xxx1"},
+		{"content":"xxx2"},
+		{"content":"xxx3"},
+		{"content":"xxx4"},
+		{"content":"xxx5"},
+		{"content":"xxx6"},
+		{"content":"xxx"},
+		{"content":"xxx1"},
+		{"content":"xxx2"},
+		{"content":"xxx3"},
+		{"content":"xxx4"},
+		{"content":"xxx5"},
+		{"content":"xxx6"},
+	]	
+}
+var start_y = 1010;
+var start_x = 10;
+var start_height = 550;
+var paper;
+var last;
+var left_set_array = new Array(2,100,250,330);
+var paper1 = false;
+//初始化画布
+$(function()
+{
+	paper = Raphael(0,0,640,1010,"content");
+	drawImage();
+	var href = paper.image("images/tantan.png",170,900,300,110);
+	href.click(function()
+	{
+	
+	})
+})
+//返回随机数与数组结合定义x轴坐标
+function getOfferSet()
+{
+	return parseInt(4*Math.random());	
+}
+//动画回调事件
+var reload = function()
+{
+	if(this.id == last)
+	{
+		drawImage();
+	}
+	this.remove();
+}
+var last_time = 10000;
+//绘制气泡和文字添加动画事件
+function drawImage()
+{
+	start_height = 550;
+	var time = 0;
+	for(var i = 0;i<jsonData.message.length;i++)
+	{
+		var info = jsonData.message[i].content;
+		var text_info = getImageWidth(jsonData.message[i].content);//文本内容
+		var width = 300;
+		var x = left_set_array[getOfferSet()];
+		var stop_x = left_set_array[getOfferSet()];
+		var image = paper.image("images/pao.png",x,start_height,width,width);
+		var text = paper.text(x+image.attr("width")/2,start_height+image.attr("width")/2+5,text_info);
+		text.attr({"font-familly":"Microsoft YaHei","stroke":"rgb(252,255,219)","stroke-width":"2","font-size":"30px"});
+		image.text = jsonData.message[i].content;
+		//点击查看详情信息
+		image.click(function()
+		{
+			showInfo(this.text);
+		})
+		//图片和文字动画效果
+		image.animate({x:stop_x,y:0},last_time+2000*i,{opacity:0.5},reload);
+		text.animate({x:stop_x+image.attr("width")/2,y:0+image.attr("width")/2-5},last_time+2000*i,{opacity:0.5},reload);
+		if(i==parseInt(jsonData.message.length-2))
+		{
+			last = image.id;
+		}
+		start_height = start_height + width*2;
+	}
+		
+}
+//根据文字长度定义气泡大小
+function getImageWidth(content)
+{
+	var length = content.length;
+	var content_array = content.split("");
+	
+	var content_info = "";
+	for(var i = 0;i<7;i++)
+	{
+		if(content_array[i]!=null)
+		{
+			content_info += content_array[i];
+		}
+	}
+	//超出7个字加省略号
+	if(length>7)
+	{
+		return content_info+"...";
+	}
+	else
+	{
+		return content_info;
+	}
+}
+var rect_id = "off";
+var t_id = false;
+//显示上内容条具体信息
+function showInfo(text)
+{
+	if("off"!=rect_id)
+	{
+		var re = paper.getById(rect_id);
+		re.remove();
+		var tt = paper.getById(t_id);
+		tt.remove();
+		var rect = paper.rect(0,0,640,100).attr({"fill":"block","opacity":0.4});
+		var text = paper.text(320,50,text).attr({"stroke":"white","font-size":"32px","font-familly":"Microsoft YaHei"});
+		rect_id = rect.id;
+		t_id = text.id;
+		rect.animate({x:0,y:0},2000,{"opacity":0.1},callback);
+		text.animate({x:320,y:50},2000,{"opacity":0.1},callback);
+	}
+	else
+	{
+		var rect = paper.rect(0,0,640,100).attr({"fill":"block","opacity":0.4});
+		var text = paper.text(320,50,text).attr({"stroke":"white","font-size":"32px","font-familly":"Microsoft YaHei"});
+		rect_id = rect.id;
+		t_id = text.id;
+		rect.animate({x:0,y:0},2000,{"opacity":0.1},callback);
+		text.animate({x:320,y:50},2000,{"opacity":0.1},callback);
+	}
+	
+}
+//上方内容动画回调函数
+function callback()
+{
+	rect_id = "off";
+	t_id = false;
+	this.remove();	
+}
+
+
+
+
+</script>
+</head>
+<body>
+
+<div id="content" ></div>
+
+
+
+</body>
+</html>
